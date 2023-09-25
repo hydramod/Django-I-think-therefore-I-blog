@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, reverse
+from django.contrib import messages
 from django.views import generic, View
 from .models import Post
 from .forms import CommentFrom
@@ -49,8 +50,10 @@ class PostDetail(View):
             comment = comment_form.save(commit=False)
             comment.post = post
             comment.save()
+            messages.success(request, 'Your comment has been submitted and is pending approval.')
         else:
             comment_form = CommentFrom()
+            messages.error(request, 'There was an error submitting your comment.')
 
         return render(
             request,
@@ -66,7 +69,7 @@ class PostDetail(View):
 
 class PostLike(View):
 
-    def post(self, request, slug):
+    def post(self, request, slug, *args, **kwargs):
         post = get_object_or_404(Post, slug=slug)
 
         if post.likes.filter(id=request.user.id).exists():
